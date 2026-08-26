@@ -1,0 +1,32 @@
+# Virtual environment (recreate with: python3.11 -m venv .venv && pip install -r requirements.txt)
+.venv/
+venv/
+env/
+
+# Python bytecode / packaging
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Model weights / caches (Hugging Face cache normally lives outside the repo
+# in ~/.cache/huggingface, but ignore defensively in case HF_HOME ever points
+# here instead)
+.cache/
+*.safetensors
+*.bin
+*.ckpt
+*.pt
+*.pth
+
+# Secrets
+.env
+.env.*
+*.pem
+
+# OS junk
+.DS_Store

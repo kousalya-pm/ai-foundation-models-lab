@@ -1,0 +1,3 @@
+cisco-tsm==1.0.2
+ipykernel
+jupyterlab
