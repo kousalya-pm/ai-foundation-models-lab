@@ -1,3 +1,8 @@
 cisco-tsm==1.0.2
 ipykernel
 jupyterlab
+llama-cpp-python
+transformers
+peft
+mlx
+mlx-lm
