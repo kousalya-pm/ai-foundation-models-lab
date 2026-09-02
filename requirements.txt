@@ -6,3 +6,5 @@ transformers
 peft
 mlx
 mlx-lm
+chromadb
+sentence-transformers
