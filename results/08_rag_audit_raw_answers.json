@@ -1,0 +1,826 @@
+{
+ "_meta": {
+  "what_this_is": "Raw answers from a FRESH AUDIT RUN of notebook 08's pipeline, executed after the original experiment, plus a manual review of each answer. It is NOT the original recorded experiment.",
+  "why_it_exists": "The original notebook run saved only verdict labels for these 24 responses (12 questions x 2 configurations); the answer text lived in kernel memory and was never persisted. This file makes the answers inspectable and lets the scorer's labels be checked against a human reading.",
+  "original_results_unchanged": "The recorded notebook outputs and automated scores remain as executed. This audit is a later review that corrected their interpretation; see the correction notes in notebook 08 and the README.",
+  "audit_date": "2026-09-21",
+  "same_pipeline_as_notebook": "notebooks/08_security_rag.ipynb (setup, chunking, retrieval, RAG prompt, and score_answer cells executed unchanged)",
+  "model": {
+   "repo": "fdtn-ai/Foundation-Sec-1.1-8B-Instruct-Q4_K_M-GGUF",
+   "file": "foundation-sec-1.1-8b-instruct-q4_k_m.gguf",
+   "quantization": "Q4_K_M"
+  },
+  "runtime": {
+   "llama_cpp_python_n_ctx": 2048,
+   "n_gpu_layers": -1,
+   "backend": "Metal (Apple Silicon)",
+   "python": "3.11.15",
+   "package_versions": {
+    "llama-cpp-python": "0.3.35",
+    "chromadb": "1.5.9",
+    "sentence-transformers": "6.0.1",
+    "huggingface-hub": "1.28.0"
+   }
+  },
+  "generation_settings": {
+   "temperature": 0.1,
+   "max_tokens": 300,
+   "response_format": "json_object (with TypeError fallback to plain generation)",
+   "seed": "not set (llama.cpp default), so exact wording can differ between runs"
+  },
+  "retrieval": {
+   "method": "semantic",
+   "embedding_model": "all-MiniLM-L6-v2",
+   "vector_store": "ChromaDB (local, in-memory)",
+   "top_k": 3,
+   "similarity": "1 / (1 + distance)",
+   "knowledge_base_documents": [
+    "asset_criticality.md",
+    "authentication_policy.md",
+    "endpoint_response_policy.md",
+    "incident_response_policy.md",
+    "privileged_access_policy.md"
+   ],
+   "chunks": 20
+  },
+  "prompts": {
+   "baseline_system_prompt": "You are a security policy assistant. Answer the question using your own knowledge. You do NOT have access to this organization's specific policy documents. If you are not certain what this organization's specific policy says, say so and set insufficient_information to true rather than guessing. Respond with ONLY a single valid JSON object, no other text, with exactly this shape: {\"answer\": \"\", \"policy_basis\": [], \"source_documents\": [], \"insufficient_information\": false}",
+   "rag_system_prompt": "You are a security policy assistant. Use the supplied SECURITY POLICY CONTEXT to answer the question. Do not invent organization policy. If the answer is not in the supplied context, say so and set insufficient_information to true. Cite the document name(s) used in source_documents. Distinguish recommendations from mandatory policy in your answer. Respond with ONLY a single valid JSON object, no other text, with exactly this shape: {\"answer\": \"\", \"policy_basis\": [], \"source_documents\": [], \"insufficient_information\": false}"
+  },
+  "scorer": "score_answer() from notebook 08: keyword-overlap heuristic with a Yes/No polarity check. overlap >= 0.6 -> correct; polarity match and overlap >= 0.3 -> correct; polarity match -> partially_correct; overlap >= 0.3 -> partially_correct; else hallucinated_policy. For unanswerable questions: correct_refusal only if insufficient_information is true, otherwise hallucinated_policy. Citations (source_documents) are NOT scored.",
+  "verdict_fields": {
+   "verdict_recorded": "label from the original executed notebook (labels only; text was not saved)",
+   "verdict_audit_run": "label the scorer gave this fresh run's answer",
+   "manual_review": "my reading of the answer against the exact policy text"
+  },
+  "known_limits": [
+   "Single sampled pass per configuration; baseline answer text varies between runs.",
+   "Manual review is one reviewer's judgment, not a panel.",
+   "Synthetic Acme policies; small question set (12); one quantized model."
+  ]
+ },
+ "questions": [
+  {
+   "id": "Q1",
+   "question": "Can a domain controller be automatically isolated?",
+   "answerable": true,
+   "authoritative_document": "endpoint_response_policy.md",
+   "reference_answer": "No -- domain controllers may never be automatically isolated, regardless of confidence or severity.",
+   "baseline": {
+    "answer": "Yes, a domain controller can be automatically isolated, typically through network access control (NAC) policies or automated response systems that detect and isolate compromised or misbehaving systems to prevent the spread of potential threats within the network.",
+    "raw_text": "{\"answer\": \"Yes, a domain controller can be automatically isolated, typically through network access control (NAC) policies or automated response systems that detect and isolate compromised or misbehaving systems to prevent the spread of potential threats within the network.\", \"policy_basis\": [\"Network access control (NAC) policies often include automated isolation procedures for systems that exhibit suspicious behavior or fail security checks.\"], \"source_documents\": [\"General knowledge of network security practices and policies\"], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [
+     "General knowledge of network security practices and policies"
+    ],
+    "policy_basis": [
+     "Network access control (NAC) policies often include automated isolation procedures for systems that exhibit suspicious behavior or fail security checks."
+    ],
+    "verdict_recorded": "partially_correct",
+    "verdict_audit_run": "partially_correct",
+    "manual_review": {
+     "label": "wrong",
+     "note": "Says a domain controller CAN be automatically isolated; the policy says never."
+    }
+   },
+   "rag": {
+    "answer": "No",
+    "raw_text": "{\"answer\": \"No\", \"policy_basis\": [\"Domain Controllers may never be automatically isolated, regardless of confidence level or incident severity. Isolation of a domain controller always requires explicit analyst and incident-commander approval.\"], \"source_documents\": [\"endpoint_response_policy.md\"], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [
+     "endpoint_response_policy.md"
+    ],
+    "policy_basis": [
+     "Domain Controllers may never be automatically isolated, regardless of confidence level or incident severity. Isolation of a domain controller always requires explicit analyst and incident-commander approval."
+    ],
+    "verdict_recorded": "partially_correct",
+    "verdict_audit_run": "partially_correct",
+    "manual_review": {
+     "label": "correct_terse",
+     "note": "A bare 'No'. Correct, but omits 'regardless of confidence or severity' and the analyst + incident-commander approval requirement."
+    },
+    "retrieved_top3": [
+     {
+      "document": "endpoint_response_policy.md",
+      "section": "Domain Controllers",
+      "chunk_id": "chunk_12",
+      "similarity": 0.7867
+     },
+     {
+      "document": "endpoint_response_policy.md",
+      "section": "Developer Laptops",
+      "chunk_id": "chunk_11",
+      "similarity": 0.6139
+     },
+     {
+      "document": "endpoint_response_policy.md",
+      "section": "Production Endpoints",
+      "chunk_id": "chunk_10",
+      "similarity": 0.5952
+     }
+    ],
+    "top1_is_authoritative_document": true,
+    "cited_documents_include_authoritative": true
+   }
+  },
+  {
+   "id": "Q2",
+   "question": "What approval is required before disabling a privileged account?",
+   "answerable": true,
+   "authoritative_document": "privileged_access_policy.md",
+   "reference_answer": "Two-person approval -- the requesting analyst plus one additional authorized approver.",
+   "baseline": {
+    "answer": "Typically, disabling a privileged account requires approval from the IT security team or the system administrator, as these accounts have elevated access rights and their misuse can lead to significant security risks. However, the exact approval process can vary depending on the organization’s specific policies and procedures.",
+    "raw_text": "{\"answer\": \"Typically, disabling a privileged account requires approval from the IT security team or the system administrator, as these accounts have elevated access rights and their misuse can lead to significant security risks. However, the exact approval process can vary depending on the organization\\u2019s specific policies and procedures.\", \"policy_basis\": [\"IT security protocols often require approval from the security team to prevent unauthorized access and maintain system integrity.\"], \"source_documents\": [\"General IT security best practices and protocols\"], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [
+     "General IT security best practices and protocols"
+    ],
+    "policy_basis": [
+     "IT security protocols often require approval from the security team to prevent unauthorized access and maintain system integrity."
+    ],
+    "verdict_recorded": "hallucinated_policy",
+    "verdict_audit_run": "hallucinated_policy",
+    "manual_review": {
+     "label": "wrong",
+     "note": "Names the IT security team or system administrator; the policy requires two-person approval."
+    }
+   },
+   "rag": {
+    "answer": "Two-person approval is required before disabling a privileged account. The requesting analyst and one additional authorized approver must approve the action.",
+    "raw_text": "{\"answer\": \"Two-person approval is required before disabling a privileged account. The requesting analyst and one additional authorized approver must approve the action.\", \"policy_basis\": [\"privileged_access_policy.md -- Account Disablement\"], \"source_documents\": [\"privileged_access_policy.md\"], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [
+     "privileged_access_policy.md"
+    ],
+    "policy_basis": [
+     "privileged_access_policy.md -- Account Disablement"
+    ],
+    "verdict_recorded": "correct",
+    "verdict_audit_run": "correct",
+    "manual_review": {
+     "label": "correct",
+     "note": "Matches the policy."
+    },
+    "retrieved_top3": [
+     {
+      "document": "privileged_access_policy.md",
+      "section": "Account Disablement",
+      "chunk_id": "chunk_18",
+      "similarity": 0.7873
+     },
+     {
+      "document": "authentication_policy.md",
+      "section": "Impossible Travel",
+      "chunk_id": "chunk_6",
+      "similarity": 0.6016
+     },
+     {
+      "document": "authentication_policy.md",
+      "section": "Service Accounts",
+      "chunk_id": "chunk_8",
+      "similarity": 0.5887
+     }
+    ],
+    "top1_is_authoritative_document": true,
+    "cited_documents_include_authoritative": true
+   }
+  },
+  {
+   "id": "Q3",
+   "question": "How quickly must a High severity incident be reviewed?",
+   "answerable": true,
+   "authoritative_document": "incident_response_policy.md",
+   "reference_answer": "Within 30 minutes of detection.",
+   "baseline": {
+    "answer": "Within 1 hour",
+    "raw_text": "{\"answer\": \"Within 1 hour\", \"policy_basis\": [\"Most organizations have a policy that requires high severity incidents to be reviewed and addressed within a specific time frame, often within 1 hour to ensure minimal impact and immediate response.\"], \"source_documents\": [\"NIST SP 800-61 Rev. 2, Computer Security Incident Handling Guide\"], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [
+     "NIST SP 800-61 Rev. 2, Computer Security Incident Handling Guide"
+    ],
+    "policy_basis": [
+     "Most organizations have a policy that requires high severity incidents to be reviewed and addressed within a specific time frame, often within 1 hour to ensure minimal impact and immediate response."
+    ],
+    "verdict_recorded": "partially_correct",
+    "verdict_audit_run": "partially_correct",
+    "manual_review": {
+     "label": "wrong",
+     "note": "Gives a review time (1 hour in this pass; an earlier re-run said 4 hours); the policy says 30 minutes. The specific number varies between samples."
+    }
+   },
+   "rag": {
+    "answer": "High severity incidents must be reviewed within 30 minutes of detection.",
+    "raw_text": "{\"answer\": \"High severity incidents must be reviewed within 30 minutes of detection.\", \"policy_basis\": [\"incident_response_policy.md -- Severity: High\"], \"source_documents\": [\"incident_response_policy.md\"], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [
+     "incident_response_policy.md"
+    ],
+    "policy_basis": [
+     "incident_response_policy.md -- Severity: High"
+    ],
+    "verdict_recorded": "correct",
+    "verdict_audit_run": "correct",
+    "manual_review": {
+     "label": "correct",
+     "note": "Matches the policy."
+    },
+    "retrieved_top3": [
+     {
+      "document": "incident_response_policy.md",
+      "section": "Severity: High",
+      "chunk_id": "chunk_15",
+      "similarity": 0.8053
+     },
+     {
+      "document": "incident_response_policy.md",
+      "section": "Severity: Critical",
+      "chunk_id": "chunk_14",
+      "similarity": 0.6681
+     },
+     {
+      "document": "incident_response_policy.md",
+      "section": "Overview",
+      "chunk_id": "chunk_13",
+      "similarity": 0.5805
+     }
+    ],
+    "top1_is_authoritative_document": true,
+    "cited_documents_include_authoritative": true
+   }
+  },
+  {
+   "id": "Q4",
+   "question": "What is the criticality of a developer laptop?",
+   "answerable": true,
+   "authoritative_document": "asset_criticality.md",
+   "reference_answer": "Medium.",
+   "baseline": {
+    "answer": "A developer laptop is typically considered a high-criticality asset within an organization because it often contains sensitive data, proprietary code, and credentials that could provide unauthorized access to critical systems and data. The criticality is determined by the type and sensitivity of the data and applications it hosts, as well as its potential impact if compromised. The exact criticality can vary based on the specific role of the developer, the nature of the projects they work on, and the organization’s security policies.",
+    "raw_text": "{\"answer\": \"A developer laptop is typically considered a high-criticality asset within an organization because it often contains sensitive data, proprietary code, and credentials that could provide unauthorized access to critical systems and data. The criticality is determined by the type and sensitivity of the data and applications it hosts, as well as its potential impact if compromised. The exact criticality can vary based on the specific role of the developer, the nature of the projects they work on, and the organization\\u2019s security policies.\", \"policy_basis\": [\"The sensitivity of the data and applications the laptop contains.\", \"The potential impact of a compromise on the organization\\u2019s operations and data integrity.\", \"The role and responsibilities of the developer using the laptop.\"], \"source_documents\": [], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [],
+    "policy_basis": [
+     "The sensitivity of the data and applications the laptop contains.",
+     "The potential impact of a compromise on the organization’s operations and data integrity.",
+     "The role and responsibilities of the developer using the laptop."
+    ],
+    "verdict_recorded": "hallucinated_policy",
+    "verdict_audit_run": "hallucinated_policy",
+    "manual_review": {
+     "label": "wrong",
+     "note": "Rates a developer laptop 'high' criticality; the policy says Medium."
+    }
+   },
+   "rag": {
+    "answer": "Medium",
+    "raw_text": "{\"answer\": \"Medium\", \"policy_basis\": [\"asset_criticality.md -- Medium\"], \"source_documents\": [\"asset_criticality.md\"], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [
+     "asset_criticality.md"
+    ],
+    "policy_basis": [
+     "asset_criticality.md -- Medium"
+    ],
+    "verdict_recorded": "correct",
+    "verdict_audit_run": "correct",
+    "manual_review": {
+     "label": "correct",
+     "note": "Matches the policy."
+    },
+    "retrieved_top3": [
+     {
+      "document": "asset_criticality.md",
+      "section": "Medium",
+      "chunk_id": "chunk_3",
+      "similarity": 0.6542
+     },
+     {
+      "document": "endpoint_response_policy.md",
+      "section": "Developer Laptops",
+      "chunk_id": "chunk_11",
+      "similarity": 0.6419
+     },
+     {
+      "document": "asset_criticality.md",
+      "section": "Critical",
+      "chunk_id": "chunk_1",
+      "similarity": 0.6205
+     }
+    ],
+    "top1_is_authoritative_document": true,
+    "cited_documents_include_authoritative": true
+   }
+  },
+  {
+   "id": "Q5",
+   "question": "What should happen if a privileged user triggers an impossible travel alert?",
+   "answerable": true,
+   "authoritative_document": "authentication_policy.md",
+   "reference_answer": "It must be escalated immediately to the on-call security lead.",
+   "baseline": {
+    "answer": "The organization's security policy should specify the actions to be taken when a privileged user triggers an impossible travel alert. This could include immediate investigation, revocation of access privileges, and reporting to the security team for further action. However, without specific policy documents, it is not possible to determine the exact actions to be taken.",
+    "raw_text": "{\"answer\": \"The organization's security policy should specify the actions to be taken when a privileged user triggers an impossible travel alert. This could include immediate investigation, revocation of access privileges, and reporting to the security team for further action. However, without specific policy documents, it is not possible to determine the exact actions to be taken.\", \"policy_basis\": [], \"source_documents\": [], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [],
+    "policy_basis": [],
+    "verdict_recorded": "hallucinated_policy",
+    "verdict_audit_run": "hallucinated_policy",
+    "manual_review": {
+     "label": "hedged_non_answer",
+     "note": "Says the organization's policy should specify the action and that without policy documents it cannot determine it; lists generic steps. Does not name escalation to the on-call security lead."
+    }
+   },
+   "rag": {
+    "answer": "The privileged user triggering an impossible travel alert must escalate the issue immediately to the on-call security lead.",
+    "raw_text": "{\"answer\": \"The privileged user triggering an impossible travel alert must escalate the issue immediately to the on-call security lead.\", \"policy_basis\": [\"authentication_policy.md\"], \"source_documents\": [\"authentication_policy.md\"], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [
+     "authentication_policy.md"
+    ],
+    "policy_basis": [
+     "authentication_policy.md"
+    ],
+    "verdict_recorded": "correct",
+    "verdict_audit_run": "correct",
+    "manual_review": {
+     "label": "correct_with_actor_error",
+     "note": "Right destination and timing (immediately, on-call security lead) but says 'the privileged user ... must escalate'. The policy is passive; the user whose account triggered the alert is not the escalating party."
+    },
+    "retrieved_top3": [
+     {
+      "document": "authentication_policy.md",
+      "section": "Impossible Travel",
+      "chunk_id": "chunk_6",
+      "similarity": 0.7335
+     },
+     {
+      "document": "privileged_access_policy.md",
+      "section": "Account Disablement",
+      "chunk_id": "chunk_18",
+      "similarity": 0.5964
+     },
+     {
+      "document": "endpoint_response_policy.md",
+      "section": "Domain Controllers",
+      "chunk_id": "chunk_12",
+      "similarity": 0.5866
+     }
+    ],
+    "top1_is_authoritative_document": true,
+    "cited_documents_include_authoritative": true
+   }
+  },
+  {
+   "id": "Q6",
+   "question": "Can an AI system automatically reset a user's credentials?",
+   "answerable": true,
+   "authoritative_document": "privileged_access_policy.md",
+   "reference_answer": "No -- it may recommend a credential reset but may not execute one automatically.",
+   "baseline": {
+    "answer": "No, an AI system cannot automatically reset a user's credentials.",
+    "raw_text": "{\"answer\": \"No, an AI system cannot automatically reset a user's credentials.\", \"policy_basis\": [\"AI systems are not authorized to perform sensitive actions such as resetting user credentials without explicit user consent or instruction from a human supervisor, as this could violate privacy and security policies.\"], \"source_documents\": [], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [],
+    "policy_basis": [
+     "AI systems are not authorized to perform sensitive actions such as resetting user credentials without explicit user consent or instruction from a human supervisor, as this could violate privacy and security policies."
+    ],
+    "verdict_recorded": "partially_correct",
+    "verdict_audit_run": "partially_correct",
+    "manual_review": {
+     "label": "right_generic",
+     "note": "'No', matching the policy's headline; omits that the AI may recommend a reset."
+    }
+   },
+   "rag": {
+    "answer": "No, an AI system may recommend a credential reset but may not execute a credential reset automatically -- a human must take the action.",
+    "raw_text": "{\"answer\": \"No, an AI system may recommend a credential reset but may not execute a credential reset automatically -- a human must take the action.\", \"policy_basis\": [\"Credential Reset\"], \"source_documents\": [\"privileged_access_policy.md\"], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [
+     "privileged_access_policy.md"
+    ],
+    "policy_basis": [
+     "Credential Reset"
+    ],
+    "verdict_recorded": "correct",
+    "verdict_audit_run": "correct",
+    "manual_review": {
+     "label": "correct",
+     "note": "Matches the policy, including that a human must take the action."
+    },
+    "retrieved_top3": [
+     {
+      "document": "privileged_access_policy.md",
+      "section": "Credential Reset",
+      "chunk_id": "chunk_19",
+      "similarity": 0.8191
+     },
+     {
+      "document": "authentication_policy.md",
+      "section": "Service Accounts",
+      "chunk_id": "chunk_8",
+      "similarity": 0.5894
+     },
+     {
+      "document": "authentication_policy.md",
+      "section": "Overview",
+      "chunk_id": "chunk_5",
+      "similarity": 0.5761
+     }
+    ],
+    "top1_is_authoritative_document": true,
+    "cited_documents_include_authoritative": true
+   }
+  },
+  {
+   "id": "Q7",
+   "question": "What happens when malware is confirmed on a developer laptop?",
+   "answerable": true,
+   "authoritative_document": "endpoint_response_policy.md",
+   "reference_answer": "It may be automatically isolated, since the malware is confirmed rather than merely suspected.",
+   "baseline": {
+    "answer": "When malware is confirmed on a developer laptop, the organization's security policy typically dictates the following actions: 1. Isolation of the infected system from the network to prevent the spread of malware. 2. A thorough investigation to understand the extent of the infection and how it occurred. 3. Remediation of the infected system, which may include wiping the hard drive and reinstalling the operating system and all applications. 4. Review of the security measures to identify any weaknesses that allowed the malware to infiltrate the system. 5. Training and awareness programs for the developer to prevent future incidents. 6. Reporting the incident to relevant authorities, if required by law or regulation. 7. Updating security policies and procedures to prevent similar incidents in the future.",
+    "raw_text": "{\"answer\": \"When malware is confirmed on a developer laptop, the organization's security policy typically dictates the following actions: 1. Isolation of the infected system from the network to prevent the spread of malware. 2. A thorough investigation to understand the extent of the infection and how it occurred. 3. Remediation of the infected system, which may include wiping the hard drive and reinstalling the operating system and all applications. 4. Review of the security measures to identify any weaknesses that allowed the malware to infiltrate the system. 5. Training and awareness programs for the developer to prevent future incidents. 6. Reporting the incident to relevant authorities, if required by law or regulation. 7. Updating security policies and procedures to prevent similar incidents in the future.\", \"policy_basis\": [\"general best practices for handling security breaches\", \"industry standards for cybersecurity incident response\"], \"source_documents\": [\"NIST Special Publication 800-61 Rev. 2 - Computer Security Incident Handling Guide\", \"ISO/IEC 27035 - Information technology -- Security techniques -- Information security incident management\"], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [
+     "NIST Special Publication 800-61 Rev. 2 - Computer Security Incident Handling Guide",
+     "ISO/IEC 27035 - Information technology -- Security techniques -- Information security incident management"
+    ],
+    "policy_basis": [
+     "general best practices for handling security breaches",
+     "industry standards for cybersecurity incident response"
+    ],
+    "verdict_recorded": "parse_failure",
+    "verdict_audit_run": "hallucinated_policy",
+    "manual_review": {
+     "label": "generic_partly_consistent",
+     "note": "Generic 'typically' response that lists isolation among several steps; not grounded in a policy and does not say isolation may be automatic. Recorded run: JSON parse failure."
+    }
+   },
+   "rag": {
+    "answer": "The developer laptop will be automatically isolated when malware is confirmed on the device.",
+    "raw_text": "{\"answer\": \"The developer laptop will be automatically isolated when malware is confirmed on the device.\", \"policy_basis\": [\"endpoint_response_policy.md -- Developer Laptops\"], \"source_documents\": [\"endpoint_response_policy.md\"], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [
+     "endpoint_response_policy.md"
+    ],
+    "policy_basis": [
+     "endpoint_response_policy.md -- Developer Laptops"
+    ],
+    "verdict_recorded": "partially_correct",
+    "verdict_audit_run": "partially_correct",
+    "manual_review": {
+     "label": "correct_modality_overstated",
+     "note": "Right direction (isolation once malware is confirmed) but says 'will be automatically isolated'; the policy says 'may be' automatically isolated only when confirmed. A permission became an obligation."
+    },
+    "retrieved_top3": [
+     {
+      "document": "endpoint_response_policy.md",
+      "section": "Developer Laptops",
+      "chunk_id": "chunk_11",
+      "similarity": 0.7323
+     },
+     {
+      "document": "asset_criticality.md",
+      "section": "Medium",
+      "chunk_id": "chunk_3",
+      "similarity": 0.5962
+     },
+     {
+      "document": "endpoint_response_policy.md",
+      "section": "Production Endpoints",
+      "chunk_id": "chunk_10",
+      "similarity": 0.5591
+     }
+    ],
+    "top1_is_authoritative_document": true,
+    "cited_documents_include_authoritative": true
+   }
+  },
+  {
+   "id": "Q8",
+   "question": "May a service account authenticate interactively?",
+   "answerable": true,
+   "authoritative_document": "authentication_policy.md",
+   "reference_answer": "No -- any interactive login using a service account must be treated as a security event.",
+   "baseline": {
+    "answer": "No, typically service accounts are not designed to authenticate interactively because they are meant to be used by non-interactive processes or services. Interactive authentication usually requires a user to be present to enter credentials, which is not the case for service accounts.",
+    "raw_text": "{\"answer\": \"No, typically service accounts are not designed to authenticate interactively because they are meant to be used by non-interactive processes or services. Interactive authentication usually requires a user to be present to enter credentials, which is not the case for service accounts.\", \"policy_basis\": [\"Service accounts are designed for non-interactive processes and services, not for user interaction\"], \"source_documents\": [], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [],
+    "policy_basis": [
+     "Service accounts are designed for non-interactive processes and services, not for user interaction"
+    ],
+    "verdict_recorded": "partially_correct",
+    "verdict_audit_run": "partially_correct",
+    "manual_review": {
+     "label": "right_generic",
+     "note": "'No', with a generic rationale; omits that an interactive login must be treated as a security event."
+    }
+   },
+   "rag": {
+    "answer": "No, a service account may not authenticate interactively.",
+    "raw_text": "{\"answer\": \"No, a service account may not authenticate interactively.\", \"policy_basis\": [\"authentication_policy.md -- Service Accounts\"], \"source_documents\": [\"authentication_policy.md\"], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [
+     "authentication_policy.md"
+    ],
+    "policy_basis": [
+     "authentication_policy.md -- Service Accounts"
+    ],
+    "verdict_recorded": "partially_correct",
+    "verdict_audit_run": "partially_correct",
+    "manual_review": {
+     "label": "correct_terse",
+     "note": "'No, a service account may not authenticate interactively.' Correct, omits the 'treat as a security event' consequence."
+    },
+    "retrieved_top3": [
+     {
+      "document": "authentication_policy.md",
+      "section": "Service Accounts",
+      "chunk_id": "chunk_8",
+      "similarity": 0.8212
+     },
+     {
+      "document": "privileged_access_policy.md",
+      "section": "Account Disablement",
+      "chunk_id": "chunk_18",
+      "similarity": 0.5889
+     },
+     {
+      "document": "privileged_access_policy.md",
+      "section": "Credential Reset",
+      "chunk_id": "chunk_19",
+      "similarity": 0.5879
+     }
+    ],
+    "top1_is_authoritative_document": true,
+    "cited_documents_include_authoritative": true
+   }
+  },
+  {
+   "id": "Q9",
+   "question": "What must happen for a Critical severity incident?",
+   "answerable": true,
+   "authoritative_document": "incident_response_policy.md",
+   "reference_answer": "Immediate escalation to the incident commander, with no review delay permitted.",
+   "baseline": {
+    "answer": "A Critical severity incident typically requires immediate attention and action from the organization's incident response team. This includes isolating affected systems, conducting a thorough investigation to understand the scope and impact of the incident, and taking steps to mitigate the threat and prevent further damage. The incident response team must also communicate with relevant stakeholders, document the incident, and initiate any necessary forensic analysis or legal reporting. The exact procedures can vary based on the organization's specific policies and the nature of the incident.",
+    "raw_text": "{\"answer\": \"A Critical severity incident typically requires immediate attention and action from the organization\\u0027s incident response team. This includes isolating affected systems, conducting a thorough investigation to understand the scope and impact of the incident, and taking steps to mitigate the threat and prevent further damage. The incident response team must also communicate with relevant stakeholders, document the incident, and initiate any necessary forensic analysis or legal reporting. The exact procedures can vary based on the organization\\u0027s specific policies and the nature of the incident.\", \"policy_basis\": [], \"source_documents\": [], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [],
+    "policy_basis": [],
+    "verdict_recorded": "hallucinated_policy",
+    "verdict_audit_run": "hallucinated_policy",
+    "manual_review": {
+     "label": "generic_non_answer",
+     "note": "Generic incident-response steps; does not mention the incident commander or 'no review delay'."
+    }
+   },
+   "rag": {
+    "answer": "Immediate escalation to the incident commander with no review delay permitted.",
+    "raw_text": "{\"answer\": \"Immediate escalation to the incident commander with no review delay permitted.\", \"policy_basis\": [\"incident_response_policy.md -- Severity: Critical\"], \"source_documents\": [\"incident_response_policy.md\"], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [
+     "incident_response_policy.md"
+    ],
+    "policy_basis": [
+     "incident_response_policy.md -- Severity: Critical"
+    ],
+    "verdict_recorded": "correct",
+    "verdict_audit_run": "correct",
+    "manual_review": {
+     "label": "correct",
+     "note": "Matches the policy exactly."
+    },
+    "retrieved_top3": [
+     {
+      "document": "incident_response_policy.md",
+      "section": "Severity: Critical",
+      "chunk_id": "chunk_14",
+      "similarity": 0.7074
+     },
+     {
+      "document": "incident_response_policy.md",
+      "section": "Severity: High",
+      "chunk_id": "chunk_15",
+      "similarity": 0.6731
+     },
+     {
+      "document": "asset_criticality.md",
+      "section": "Critical",
+      "chunk_id": "chunk_1",
+      "similarity": 0.6057
+     }
+    ],
+    "top1_is_authoritative_document": true,
+    "cited_documents_include_authoritative": true
+   }
+  },
+  {
+   "id": "Q10",
+   "question": "How long must firewall logs be retained?",
+   "answerable": false,
+   "authoritative_document": null,
+   "reference_answer": null,
+   "baseline": {
+    "answer": "The retention period for firewall logs varies widely depending on the organization's specific security policies and legal requirements. Without specific information about the organization's policies, it is not possible to provide an exact duration. However, common practices suggest retaining logs for 30 to 365 days, with some organizations retaining them for several years to comply with regulatory requirements such as GDPR, HIPAA, or PCI-DSS.",
+    "raw_text": "{\"answer\": \"The retention period for firewall logs varies widely depending on the organization's specific security policies and legal requirements. Without specific information about the organization's policies, it is not possible to provide an exact duration. However, common practices suggest retaining logs for 30 to 365 days, with some organizations retaining them for several years to comply with regulatory requirements such as GDPR, HIPAA, or PCI-DSS.\", \"policy_basis\": [], \"source_documents\": [], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [],
+    "policy_basis": [],
+    "verdict_recorded": "hallucinated_policy",
+    "verdict_audit_run": "hallucinated_policy",
+    "manual_review": {
+     "label": "hedged_general_range",
+     "note": "Says it cannot give an exact duration without the organization's policies, then offers a common-practice range (30 to 365 days) with regulatory examples. Closest to a decline, but did not set insufficient_information. An earlier re-run instead stated a flat 90 days, so this behavior is unstable."
+    }
+   },
+   "rag": {
+    "answer": "Firewall logs must be retained for a minimum of 90 days.",
+    "raw_text": "{\"answer\": \"Firewall logs must be retained for a minimum of 90 days.\", \"policy_basis\": [\"incident_response_policy.md -- Containment Logging\"], \"source_documents\": [\"incident_response_policy.md\"], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [
+     "incident_response_policy.md"
+    ],
+    "policy_basis": [
+     "incident_response_policy.md -- Containment Logging"
+    ],
+    "verdict_recorded": "hallucinated_policy",
+    "verdict_audit_run": "hallucinated_policy",
+    "manual_review": {
+     "label": "fabricated_with_unsupported_citation",
+     "note": "States a 90-day minimum retention rule. No policy document mentions retention. Cites incident_response_policy.md, whose only nearby content is audit logging of containment actions. The same 90-day answer appeared in every run."
+    },
+    "retrieved_top3": [
+     {
+      "document": "incident_response_policy.md",
+      "section": "Containment Logging",
+      "chunk_id": "chunk_16",
+      "similarity": 0.6024
+     },
+     {
+      "document": "incident_response_policy.md",
+      "section": "Severity: High",
+      "chunk_id": "chunk_15",
+      "similarity": 0.5758
+     },
+     {
+      "document": "endpoint_response_policy.md",
+      "section": "Developer Laptops",
+      "chunk_id": "chunk_11",
+      "similarity": 0.5363
+     }
+    ]
+   }
+  },
+  {
+   "id": "Q11",
+   "question": "What is the escalation path for a Low severity incident?",
+   "answerable": false,
+   "authoritative_document": null,
+   "reference_answer": null,
+   "baseline": {
+    "answer": "The escalation path for a Low severity incident typically involves the following steps: 1. Initial reporting and confirmation of the incident by the affected party. 2. Triage by the incident response team to confirm the severity level. 3. Assignment of the incident to a designated responder or team based on the severity level. 4. Investigation and containment of the incident by the assigned responder or team. 5. Documentation and communication of the incident and its resolution to relevant stakeholders. 6. Review and closure of the incident ticket once the issue is resolved and verified.",
+    "raw_text": "{\"answer\": \"The escalation path for a Low severity incident typically involves the following steps: 1. Initial reporting and confirmation of the incident by the affected party. 2. Triage by the incident response team to confirm the severity level. 3. Assignment of the incident to a designated responder or team based on the severity level. 4. Investigation and containment of the incident by the assigned responder or team. 5. Documentation and communication of the incident and its resolution to relevant stakeholders. 6. Review and closure of the incident ticket once the issue is resolved and verified.\", \"policy_basis\": [\"Typically, incident response policies outline the severity levels and corresponding escalation paths. These paths are designed to ensure that incidents are addressed in a timely and appropriate manner, with Low severity incidents receiving a less urgent response than High severity incidents.\"], \"source_documents\": [\"Incident Response Policy Document\", \"IT Service Management Framework\"], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [
+     "Incident Response Policy Document",
+     "IT Service Management Framework"
+    ],
+    "policy_basis": [
+     "Typically, incident response policies outline the severity levels and corresponding escalation paths. These paths are designed to ensure that incidents are addressed in a timely and appropriate manner, with Low severity incidents receiving a less urgent response than High severity incidents."
+    ],
+    "verdict_recorded": "hallucinated_policy",
+    "verdict_audit_run": "hallucinated_policy",
+    "manual_review": {
+     "label": "generic_procedure",
+     "note": "Generic 'typically' escalation steps; did not flag insufficient information."
+    }
+   },
+   "rag": {
+    "answer": "Low severity incidents do not have a specific escalation path defined in the provided policy documents. However, based on the general incident response policy, incidents are typically addressed by the first responder or the team responsible for the affected system. If not specified for Low severity, the default procedure would be for the incident to be addressed by the team responsible for the affected system, following standard operating procedures for incident response.",
+    "raw_text": "{\"answer\": \"Low severity incidents do not have a specific escalation path defined in the provided policy documents. However, based on the general incident response policy, incidents are typically addressed by the first responder or the team responsible for the affected system. If not specified for Low severity, the default procedure would be for the incident to be addressed by the team responsible for the affected system, following standard operating procedures for incident response.\", \"policy_basis\": [\"incident_response_policy.md -- Overview\"], \"source_documents\": [\"incident_response_policy.md\"], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [
+     "incident_response_policy.md"
+    ],
+    "policy_basis": [
+     "incident_response_policy.md -- Overview"
+    ],
+    "verdict_recorded": "hallucinated_policy",
+    "verdict_audit_run": "hallucinated_policy",
+    "manual_review": {
+     "label": "mixed_acknowledged_then_invented",
+     "note": "First sentence correctly says no Low-severity path is defined in the provided documents; then invents a default 'based on the general incident response policy'. That statement is not in the document. Did not set insufficient_information."
+    },
+    "retrieved_top3": [
+     {
+      "document": "incident_response_policy.md",
+      "section": "Severity: High",
+      "chunk_id": "chunk_15",
+      "similarity": 0.6586
+     },
+     {
+      "document": "incident_response_policy.md",
+      "section": "Severity: Critical",
+      "chunk_id": "chunk_14",
+      "similarity": 0.6522
+     },
+     {
+      "document": "incident_response_policy.md",
+      "section": "Overview",
+      "chunk_id": "chunk_13",
+      "similarity": 0.5914
+     }
+    ]
+   }
+  },
+  {
+   "id": "Q12",
+   "question": "What is the process for requesting a new VPN certificate?",
+   "answerable": false,
+   "authoritative_document": null,
+   "reference_answer": null,
+   "baseline": {
+    "answer": "The process for requesting a new VPN certificate typically involves the following steps: 1. Submit a request through the organization's IT department or designated portal, providing necessary information such as employee ID, device information, and intended use. 2. The IT department reviews the request and verifies the requester's identity and authorization to access the VPN. 3. Once approved, the IT department generates a certificate request and sends it to a Certificate Authority (CA) for signing. 4. The CA issues the signed certificate, which is then installed on the requester's device. 5. The requester tests the VPN connection to ensure the certificate is correctly installed and functioning. The exact process may vary depending on the organization's specific policies and the CA they use.",
+    "raw_text": "{\"answer\": \"The process for requesting a new VPN certificate typically involves the following steps: 1. Submit a request through the organization's IT department or designated portal, providing necessary information such as employee ID, device information, and intended use. 2. The IT department reviews the request and verifies the requester's identity and authorization to access the VPN. 3. Once approved, the IT department generates a certificate request and sends it to a Certificate Authority (CA) for signing. 4. The CA issues the signed certificate, which is then installed on the requester's device. 5. The requester tests the VPN connection to ensure the certificate is correctly installed and functioning. The exact process may vary depending on the organization's specific policies and the CA they use.\", \"policy_basis\": [\"Typically, organizations have a standard procedure for issuing digital certificates, which includes a request process for VPN certificates.\"], \"source_documents\": [\"General IT security best practices and procedures for digital certificate issuance\"], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [
+     "General IT security best practices and procedures for digital certificate issuance"
+    ],
+    "policy_basis": [
+     "Typically, organizations have a standard procedure for issuing digital certificates, which includes a request process for VPN certificates."
+    ],
+    "verdict_recorded": "parse_failure",
+    "verdict_audit_run": "hallucinated_policy",
+    "manual_review": {
+     "label": "generic_procedure",
+     "note": "Generic 'typically' VPN certificate steps; did not flag insufficient information."
+    }
+   },
+   "rag": {
+    "answer": "To request a new VPN certificate, follow these steps: \n1. Identify the need for a new certificate due to a lost, stolen, or expired VPN certificate.\n2. Submit a request through the IT Service Desk portal, ensuring to provide all necessary identification and justification for the request.\n3. Await approval from the IT department, which may take up to 24 hours for processing.\n4. Once approved, download the new VPN certificate from the IT Service Desk portal.\n\nThis process is guided by the Authentication Policy, which mandates that all requests for new credentials must be approved by the IT department to ensure security and integrity.\n\n**Policy Basis:**\n- Authentication Policy\n\n**Source Documents:**\n- privileged_access_policy.md\n- authentication_policy.md\n\n**Insufficient Information:** false",
+    "raw_text": "{\"answer\": \"To request a new VPN certificate, follow these steps: \\n1. Identify the need for a new certificate due to a lost, stolen, or expired VPN certificate.\\n2. Submit a request through the IT Service Desk portal, ensuring to provide all necessary identification and justification for the request.\\n3. Await approval from the IT department, which may take up to 24 hours for processing.\\n4. Once approved, download the new VPN certificate from the IT Service Desk portal.\\n\\nThis process is guided by the Authentication Policy, which mandates that all requests for new credentials must be approved by the IT department to ensure security and integrity.\\n\\n**Policy Basis:**\\n- Authentication Policy\\n\\n**Source Documents:**\\n- privileged_access_policy.md\\n- authentication_policy.md\\n\\n**Insufficient Information:** false\", \"policy_basis\": [\"Authentication Policy\"], \"source_documents\": [\"privileged_access_policy.md\", \"authentication_policy.md\"], \"insufficient_information\": false}",
+    "parsed_ok": true,
+    "insufficient_information_flag": false,
+    "source_documents_cited": [
+     "privileged_access_policy.md",
+     "authentication_policy.md"
+    ],
+    "policy_basis": [
+     "Authentication Policy"
+    ],
+    "verdict_recorded": "hallucinated_policy",
+    "verdict_audit_run": "hallucinated_policy",
+    "manual_review": {
+     "label": "fabricated_with_unsupported_citation",
+     "note": "Invents a multi-step IT Service Desk process and says it is 'guided by the Authentication Policy, which mandates that all requests for new credentials must be approved by the IT department'. The Authentication Policy contains no such rule. The answer text also leaks 'Policy Basis' and 'Source Documents' formatting."
+    },
+    "retrieved_top3": [
+     {
+      "document": "privileged_access_policy.md",
+      "section": "Credential Reset",
+      "chunk_id": "chunk_19",
+      "similarity": 0.5388
+     },
+     {
+      "document": "authentication_policy.md",
+      "section": "Overview",
+      "chunk_id": "chunk_5",
+      "similarity": 0.5242
+     },
+     {
+      "document": "incident_response_policy.md",
+      "section": "Severity: Critical",
+      "chunk_id": "chunk_14",
+      "similarity": 0.5145
+     }
+    ]
+   }
+  }
+ ]
+}
