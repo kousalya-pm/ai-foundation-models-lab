@@ -34,15 +34,15 @@ Evaluation and RAG each appear twice in this repo: 04 and 05 were the first pass
 **Track 2 — Foundation-Sec (security LLM)**
 - Foundation-Sec's first evaluation pass (12 scenarios) scored 83.3% classification accuracy, 0.19/0.27/0.22 MITRE precision/recall/F1, and zero fabricated IPs, usernames, or commands across all 12 responses.
 - A second, larger evaluation pass (30 scenarios, 8 independent dimensions) showed genuinely different pictures per metric on the same model: 80% classification accuracy and 100% output-validity, but only 0.27 MITRE F1 and 57% evidence completeness. No single number would have shown this.
-- RAG demonstrated the gap between pretrained knowledge and organization-specific context directly: on organization-specific policy questions, the model answered correctly 0/9 times unaided and 6/9 times with retrieval, while retrieval itself never missed the right document (0/9 top-1 misses) — every remaining RAG failure was a generation/reasoning failure, not a retrieval failure.
-- Neither the unaided model nor RAG ever correctly declined to answer a question with no supporting policy (0/3 correct refusals in both conditions) — a real, mildly concerning result, kept in rather than smoothed over.
+- RAG demonstrated the gap between pretrained knowledge and organization-specific context directly: on organization-specific policy questions, the model matched the policy's wording 0/9 times unaided and 6/9 times with retrieval (strict keyword scoring), and retrieval itself never missed the right document (0/9 top-1 misses). On manual review, the other 3 RAG answers were substantively correct but shorter than the reference (one was a bare "No"), so the keyword scorer undercounted them — a scoring limitation, not a model failure.
+- The failure that actually occurred was abstention: neither the unaided model nor RAG ever declined to answer a question with no supporting policy (0/3 correct refusals in both conditions) — a real, mildly concerning result, kept in rather than smoothed over.
 - LoRA fine-tuning materially improved a small general-purpose model on a narrow classification task (Qwen2.5-0.5B: 33% → 67%), but made no difference to the already-strong security-specialized model on the same task (Foundation-Sec: 100% → 100% validation, 83% → 83% generalization) — a ceiling effect, not a failed fine-tune.
 
 Every finding above sits beside its own limitations in the notebook that produced it — see [Important caveats](#important-caveats) and each notebook's own "Limitations" section for what these numbers do and don't support.
 
 ## Product takeaways
 
-1. **Start with the failure mode, not the AI technique.** Notebook 08's failure taxonomy separates wrong-retrieval from wrong-reasoning specifically because they need different fixes — "RAG isn't working" isn't an actionable bug report.
+1. **Start with the failure mode, not the AI technique.** Notebook 08's failure taxonomy separates retrieval failures, generation failures, and failure-to-abstain because each needs a different fix — and in this run the failure that actually occurred was abstention, not retrieval or reasoning. "RAG isn't working" isn't an actionable bug report.
 2. **Evaluate before deciding to fine-tune.** Notebook 06's two variants show LoRA closing a real gap on one model and doing nothing on another that was already at ceiling — you can't tell which situation you're in without evaluating first.
 3. **The best benchmark model may not be the best product model.** Notebook 07's 12.53s median latency is a product-blocking number for an interactive SOC workflow, independent of how good the model's classification accuracy is.
 4. **Model quality must include latency, cost, grounding, and reliability, not just accuracy.** Notebook 07's 8-dimension scorecard exists because a model can score well on one axis and poorly on another simultaneously.
@@ -118,7 +118,7 @@ The point isn't that these numbers are better or worse than 04's — it's that n
 
 - Retrieval quality: **TF-IDF 89% top-1 accuracy vs. semantic 100% top-1** — semantic embeddings were chosen for the rest of the notebook on that evidence, not by default.
 - Baseline (no retrieval): **0/9 correct** on organization-specific questions (6/12 hallucinated policy overall).
-- With retrieval: **6/9 correct** (3/12 hallucinated policy overall); retrieval was never the bottleneck — every remaining failure was a generation/reasoning failure, not a retrieval miss.
+- With retrieval: **6/9 correct** by strict keyword scoring (3/12 hallucinated policy overall — all three on the unanswerable questions). Reading the other three answers directly, all were substantively correct but shorter than the reference answer (e.g., a bare "No"), so the scorer undercounted them; notebook 08 carries a correction note on this. Retrieval was never the bottleneck.
 - **0/3 correct refusals** on unanswerable questions, in both the baseline and RAG conditions — the model never appropriately said "I don't know," even when instructed to and even when retrieved context didn't cover the topic.
 - A conflicting-policy test (two versions of the same rule, one marked current and one marked superseded) showed the model correctly picked the current one when both were explicitly tagged with version/status metadata.
 
@@ -147,6 +147,7 @@ Every experiment here is **exploratory, not a benchmark**:
 
 - CTSM's experiments run on one synthetic, single-seed series; nothing is claimed to generalize past the exact settings tested (notebook 02's own "Observations" section states this explicitly).
 - The security golden datasets (12 and 30 scenarios, across notebooks 04 and 07) and RAG question sets (10 and 12, across notebooks 05 and 08) are small and hand-authored by one person, not reviewed by a SOC analyst or drawn from real incidents.
+- Free-text answers are scored by transparent keyword-overlap heuristics, not human review. Notebook 08's own manual read-through showed the heuristic undercounting terse-but-correct answers, so a "partially correct" label there means "shorter than the reference," not "wrong."
 - Fine-tuning used ~36-45 synthetic training examples — enough to demonstrate the mechanism, not to certify production classification behavior.
 - ChromaDB (notebook 08) is used in local, in-memory mode for a retrieval-method comparison — no persistence, scale, or production deployment concerns were tested.
 - No customer data, no real threat intelligence, and no real vulnerability data appear anywhere in this repo; every IP address uses RFC 5737 documentation ranges, every CVE-shaped identifier is an explicitly fictional placeholder, and every policy document is marked synthetic in its own text.

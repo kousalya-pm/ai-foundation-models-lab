@@ -2,9 +2,9 @@
 
 Ten principles this lab's experiments surfaced directly — each tied to the specific notebook that produced it, not asserted in the abstract.
 
-1. **Diagnose the failure layer before choosing the intervention.** Notebook 08's failure taxonomy splits "wrong retrieval," "correct retrieval + wrong reasoning," and "correct retrieval + hallucination" into separate categories because each needs a different fix — better chunking, a different model, or a stricter grounding check, respectively. Treating "RAG gave a bad answer" as one problem leads to fixing the wrong layer.
+1. **Diagnose the failure layer before choosing the intervention.** Notebook 08's failure taxonomy splits "wrong retrieval," "correct retrieval + wrong reasoning," and "correct retrieval + hallucination" into separate categories because each needs a different fix — better chunking, a different model, or a stricter grounding check, respectively. Treating "RAG gave a bad answer" as one problem leads to fixing the wrong layer. In the recorded run, the failure that actually occurred was neither retrieval nor reasoning but abstention: the model answered all 3 unanswerable questions instead of declining.
 
-2. **Establish a baseline before optimization.** Every experiment in this lab is structured as baseline-then-intervention: notebook 05/08 measure the unaided model before adding retrieval; notebook 06 measures the base model before fine-tuning. Without the baseline, "6/9 correct with RAG" is an unfalsifiable number instead of a 6x improvement over 0/9.
+2. **Establish a baseline before optimization.** Every experiment in this lab is structured as baseline-then-intervention: notebook 05/08 measure the unaided model before adding retrieval; notebook 06 measures the base model before fine-tuning. Without the baseline, "6/9 correct with RAG" is a number with no reference point instead of a measured improvement over 0/9 unaided.
 
 3. **Fine-tuning is not automatically the answer.** Notebook 06's side-by-side comparison: LoRA took a general-purpose model from 33% to 67% accuracy, and did nothing for a security-specialized model already at 100%/83% — same technique, same dataset size, opposite outcome, because the second model had no gap left to close.
 
